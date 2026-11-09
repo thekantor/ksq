@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>Ксюшин квест</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;600;700&family=Caveat:wght@500;700&display=swap">
+</head><body>
+<style>
+/* Зимняя ночь, одна тропа сверху вниз от дома до башни; тропа рисуется золотом по мере того, как открываются точки.
+   Единая тёмная тема выбрана намеренно. */
+:root{color-scheme:dark;
+ --night:#0d1730;--night2:#152342;--night3:#1d2d52;--snow:#eef3fa;--frost:#9db3d4;--mut:#8ea2c4;
+ --gold:#f1c04f;--gold-ink:#241a02;--ribbon:#de4b57;--line:#ffffff1f;
+ --display:"Unbounded","Arial Black",system-ui,sans-serif;--body:"Manrope",system-ui,sans-serif;--hand:"Caveat","Segoe Print",cursive}
+*{box-sizing:border-box}
+html,body{background:var(--night);color:var(--snow)}
+body{margin:0;font:16px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+ background:radial-gradient(600px 380px at 85% -5%,#2a3f74 0,transparent 65%),radial-gradient(500px 360px at -10% 40%,#24305e 0,transparent 60%),var(--night)}
+.wrap{max-width:980px;margin:0 auto;padding-block:26px 56px}
+header.top{display:grid;gap:6px;margin-bottom:18px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--frost);margin:0}
+h1{font:700 clamp(26px,6.4vw,44px)/1.1 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--gold)}
+.prog{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mut);margin-top:4px}
+.prog .dots{display:flex;gap:5px}.prog .dots i{width:22px;height:5px;border-radius:9px;background:#ffffff1c}.prog .dots i.on{background:var(--gold)}
+.layout{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:minmax(0,1fr)}}
+/* map */
+.map{position:relative;background:linear-gradient(180deg,#14234466,#0d173000);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.map svg{display:block;width:100%;height:auto}
+.map .trail{fill:none;stroke:#9db3d455;stroke-width:3;stroke-dasharray:2 9;stroke-linecap:round}
+.map .done{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 6px #f1c04f88)}
+.node{cursor:pointer;outline:none}
+.node circle.ring{fill:var(--night2);stroke:#9db3d466;stroke-width:2}
+.node.open circle.ring{fill:var(--gold);stroke:var(--gold)}
+.node.cur circle.ring{stroke:#fff;stroke-width:3}
+.node.sel circle.halo{opacity:1}
+.node circle.halo{fill:none;stroke:var(--gold);stroke-width:2;opacity:0}
+.node.cur circle.halo{opacity:.8;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.7);opacity:0}}
+.node text.n{font:700 14px var(--display);fill:var(--frost);text-anchor:middle;dominant-baseline:central}
+.node.open text.n{fill:var(--gold-ink)}
+.node text.lbl{font:600 15px var(--body);fill:var(--snow)}
+.node text.sub{font:500 12px var(--body);fill:var(--mut)}
+.node.locked text.lbl{fill:var(--mut);letter-spacing:.2em}
+.node:focus-visible circle.ring{stroke:#fff;stroke-width:3}
+.flake{fill:#ffffff;opacity:.5}
+/* card */
+.card{grid-template-columns:minmax(0,1fr);background:var(--night2);border:1px solid var(--line);border-radius:22px;padding:20px 18px;display:grid;gap:14px;min-width:0}
+.card .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--frost);margin:0}
+.card h2{font:700 clamp(21px,4.6vw,28px)/1.18 var(--display);margin:0;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:4px 11px;border-radius:99px;background:#ffffff10;border:1px solid var(--line);color:var(--snow)}
+.chip.gold{background:#f1c04f1f;border-color:#f1c04f55;color:var(--gold)}
+.lead{margin:0;font-size:16.5px}
+.box{border-radius:14px;padding:12px 14px;background:var(--night3);display:grid;gap:3px}
+.box b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--frost);font-weight:700}
+.box.ribbon{background:linear-gradient(90deg,#de4b5726,#de4b570d);border:1px solid #de4b5744}
+.box.ribbon b{color:#ff9aa2}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+a.btn,button.btn{font:600 14.5px var(--body);display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:#ffffff0d;color:var(--snow);text-decoration:none;cursor:pointer}
+a.btn:hover,button.btn:hover{background:#ffffff18}
+.btn.primary{background:var(--gold);color:var(--gold-ink);border-color:transparent}
+.btn.primary:hover{background:#ffd06a}
+a.btn:focus-visible,button.btn:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.hints{display:grid;gap:8px}
+.hint{font-size:15px;padding:10px 14px;border-radius:12px;border:1px dashed #9db3d466;color:var(--snow)}
+form.code{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding-top:6px;border-top:1px solid var(--line)}
+form.code label{font-size:13px;color:var(--frost)}
+.row{display:flex;gap:8px}
+.row input{flex:1;min-width:0;font:700 18px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:12px 14px;border-radius:12px;border:1px solid #9db3d466;background:var(--night);color:var(--snow)}
+.row input::placeholder{color:#8ea2c477;letter-spacing:.02em;text-transform:none;font:500 16px var(--body)}
+.msg{min-height:1.4em;font-size:14px;margin:0;color:var(--mut)}
+.msg.err{color:#ff9aa2}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.okline{font-size:14px;color:var(--gold);margin:0}
+/* letter */
+.letter{background:#f6efe2;color:#2b2335;border-radius:6px;padding:22px 20px 18px;box-shadow:0 14px 40px #0008;transform:rotate(-.6deg);display:grid;gap:8px}
+.letter p{margin:0;font:500 25px/1.25 var(--hand)}
+.letter .sig{font:700 30px/1.1 var(--hand);color:var(--ribbon);margin-top:6px}
+.contact{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--mut)}
+.note{font-size:13px;color:var(--mut);margin:0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+ <header class="top">
+  <p class="eyebrow">2 января · квест</p>
+  <h1>Ксюша, сегодня <em>твой день</em></h1>
+  <div class="prog"><span class="dots" id="dots"></span><span id="progtxt"></span></div>
+ </header>
+ <div class="layout">
+  <div class="map" id="map" aria-label="Карта квеста"></div>
+  <div id="card" class="card" aria-live="polite"></div>
+ </div>
+ <div class="contact" id="contact"></div>
+</div>
+
+<script>
+(function(){
+var D={"first":{"short":"Дома","title":"Доброе утро, именинница","time":"утро","text":"Сегодня твой день, и он уже расписан. По пути тебя ждут конверты: в каждом записка и кодовое слово. Вводишь слово здесь, и на карте открывается следующее место. Ничего сложного, просто иди за подсказками.","where":"Первое слово спрятано дома. Иди в душ, включи воду погорячее и закрой дверь. Когда зеркало запотеет, посмотри на него.","task":"Собирайся спокойно. Деньги на такси и на обед лежат в конверте. Следующее такси вызови к 12:00.","hints":["Слово проявится на зеркале в ванной от пара. Подожди пару минут с горячей водой.","Если зеркало так и не показало слово, открой маленький конверт «на всякий случай»."],"ask":"Слово с зеркала"},"locked":[{"s":"nPnxzlPG0PUHWnW0vnrPvA==","i":"4pHWRVhLZBUJvg3I","c":"EUCj3ZDDDguCtMww5V0RNbuVgMEQXpnFzRWiVGOsh83aF07XjilGF+Z+dogFZxZTQCeQT4vDw6JSWoUYOEW9ZwLPFpe+3V40ev7lDkb41F94U/NcoGvY+2PFnrF1pUxoOs5cMmuUMd41jLSLdoJ5ji0S27+2ZnjGhAy6SZca7CXYzi6qf5uqEdlI0hL4PM8fjrbf8OWuRosg3vPFEEBZlP2IQo2ypsODQj/z62ewOv11AcKcWGw4qKSa5tF/yIZuuYqGPgqmUaoV7pC12yUh+6EMy2NUOeggsT2xiyaQRZmU4RQftr0+UUTs47PY20siCx5aD/jjEw5p5gEBP79xlifMqG8bJJ260QijZprP4plUEWdnvsTFUAFAucS0uYUM2qao3uMONjkCrcusocYPiQcZTclnKMfgRJEtVYZzqNsUWjSZYc9UAKqnSUwh1N+eNih8IImR4LUpXL+Gf5Uw9Ex9g9SE2Cz10/gqe+aeaend21Zs33eqYxbD5KxrG9x9Omj4wbhavUVS4/4Xjlgrs8JGE077HiyopY17CD5N6EMmWtlRh5qGI9nRJR/A9CiAcVKUJ34bmhsPijZ0V4kqC50MxejC4M3Rur9X62+bTlJwW+WYyS6UvFJD/mAqICHGHS4HOjLApnW3rBX/UpHgXNWbs1OI6wDpSXOqHa4AZX3vn/J+/g+7mgkeMuOY6G6QIGXVO2Ty5pHwOHRwMN6J1N1m5Thq0gwuk2Fx9tKIgfEqvw9OCX0iKbX8gduhmPBJFbPKdMQ99TzZcljrzDFuUc39306lF0PlngiKTFpZl5RWDcbEyeu2A63qkDlGpbLtHue6I/VAN9eP+eGlxX+DIBUAfY+d8hJu2N+BFQJuq+P05ayTttPIzVJ7KiRnI2zRRB84f82laJuYQ+GhcZ/O1LIFaQtHI8RSuftcG9kU6XDXkH8yVh4MI2v5EINsJdBTtNwjOhLSfKymYAL9ONxfdTQIVMY/Q/xJuzJU/yRC5fvhlcPTZlqFJ+Wt0ILWrRmNVHdJjs24jpEn/7i0k6XwcWZM1Q2v7+s9sTJ9ntm5dc0egnvYGRMWWxIi5gQ/Ub4+cFyLlkIKWH/qPkvtEheeMVdOzuvtkxdyJiWI0Y0nOFx1GCMT408MJZMaooCrBnWtx7T7ChozCGcUYJlzBA3jE0yli0W+BH0jPsSBgTmNW/YHyRCnDOpaMHpZDoOh/4rXTaJbS57uj697nxV3fNWwyj8o4B1ykUvkW0qm501ludMCPGt3x5HymlC2ilz8Zdf9JJz3hDww905q6URa1Qqr4AlWKcDwh+PAbKdL3Kg/xchICGnFrfbRK+KIhBoHNn13GvFPfi8BsdLeQnwHlqvy6KDhnSvmREUTJyVqVZgohI2ga1eXuDHZlDWjWRZvqHZF+BnPH04+1djtAXCcmZdZZ4yjn+0Vx/SQaQzey5lcQlpxHiaMXrDHbI8bV6XJtMRSUlfBKD7LXBBRXt71YA0/x+M58S7P"},{"s":"4vIo8arYkMt+kIkMDMGTsw==","i":"eQB3vO3azyCFwylo","c":"xZrjaI/vXylzwLVzH6oDKmucwJinC+snjJG7XiOhOTUir7XNqEGl7NhaoHvR6754+CYrxS6I5dNGL3WnHmuwDOyziW2hzgEDBOgQYfXnIQHrcuD7jfLzUKSoyWDgYS3YeBYF1HG4tY2l8Ktm6CEvEp2ACCn4EIz2QNHIq0gCkRX1EdfVcKZf8c0BWUQFD+f51h58XmviOOCZqLp9j4+kHv+lMLxOQNkuOukswc0CaJOLrU2eLLnXFYk+2tmM7rIQOzD+RVIAXVkY1ESkEdUwkShc4oI0lXzfwatLmJ9xLhE56x8HR3zwKdoaOYy4FePwV9hCzs+x3UjpelqrqQJu3VqbcErXNYtI5QOPeV7DN2jD64Y5WknuAfS4SJOSh+L/MA7RLsDvxmAcoJJti74OkUkS6g4V68yE6AoP8u8SWAFdjd9+VWcnT6lmESH0NsyeMjXjwvrN+C75wlfb/i8MUX3Ms6gsyGmwXcHWYrf9SWrLdAm/L9GXiRn2O3X2BurqP+E5TE7bX+n+V2/HQUwECnL5+YTBLkLqAA7kQz4F0h3qeZTtRBILlj7INijdZOHE61KiMLDZynIMvI8x1KqDNCvmBcdTGo1yjbxVFp+HU+LH+f7vwmwmrP612QTrxdaly5cEgpIalW/QLwlIlt1snsdNWXf6lw3VCcFJ67lf27YgYWZCz9IAZFK7Pv7hM6CbtG46OlB1g5GAq7K1OFoZG+93X7y08MizhsIJgdDVJIvFBrpV8FqOL4y4MVYPZ3wGJ7CUMAgy/uaTa63zC29gTwCWq392JTJN/qGMw5/n6L7paKxcn14FQ0Uc8qj1P8cxqlJeMKgVi8v8jG7CyCFCfOHJoD+PV3nCxYPbsL06Z5yjh6D9NZ+7tvrkiSX03P6tdP1wVObdkTimKFsG5Bbhb1iNaq71bQf0iYPPbyp+MGv1zR3BbnaHoGFA/DNk2p4n1P1kAsdMaCtewjvYQvAfBpvd1oK0c4f4S81b/htFpqIxyhTHnbkz1jyADW02qyw9MnKD/6GKHY+OfgPqOlI2wrH90xssUBl4pr+5ol1RQitXgSyIVapjDdWxuE6DuHv/n9g145obyQEDM+AjnTv7DBOCpTniZbzsPj4D4UEpU42kwYgD2DzO2D93Ig3o95XAj7CldjLFOGI4Id0BQThUsvbb1Jf9DXF+Pi7STc9HDXsxEMhq0gUkcpqZ6+tnu5fBwL6o9nwV0rMI2xQpDGk1ks7HsdSL1MkyhFFE7+wULxRX"},{"s":"3VJwJpTNSwrlTkBsMKiwXQ==","i":"Vnc7NG1GOQeBmLdo","c":"kdUQTbor+E0eexBL867+Pfzj2C5Fhpq8NgCVTKeI37FgtEPqUjfbnOfyj70OZ1rzxR9ROGfiiWGPCbKzg70fIgyOZCphMc5o1lTCwI+8LvIHw9yVyxWpnJoWNoAuQBom9HngCO7w97upXDHS6/Y8HwfLq9yoeU496OPO9Gf1cDlAxHmjlz0iJepqA4Np/5aZbFNHoJO7ZH7BfpcqHIAapXFCaBzL5m9IuRO6UU8+czkVXHJNUjm7EVtDH2DclPE8+LwBW3vft+Y6p5gA11AuJmom4Km3iLNXKSF7eCRFOaVQb0gGSXaCXw2hHQI/SYY6ieZsW8hg4Ffvvd46oKUeca8tS2D+tESatJF/+Xv4wpGr7+VqHxA2Nuy06JB1wXC0ADgSHBRTDSavsyTMSRwXzr1jSfihwwqBQzWKNptNH50b49eyh9xknbZh7nDOHWa+bMv4wEuGtfQYRvptpxBGUz5d6uyxjTyb3XpGDJhmP7LeCdSlEmkTDCFWJxmKGPI6J0ckkv66vy814jYmOMVW/rqeSKYf64AgMkoe1uSNgEdv2ljPJZxccMz2EMkXMIBOrACT6WNctmcgRa97NuxxjUZWqiZJk2LdCrD6ZSvBGgspxOz1Xn1N6agoUfANuGUF9nRKnp6LjtIRJiA/pCwX71CjQr0Z6rwmtbF9+Ico2QpX1JLcePNzElQS/lG70jyO/rwJ0B/X5qmehUeJccB4dEegM8Ohus33aHzuXrSjBsl/uWCkKDEq5tclRh9yb3njAooPT8XruNY803R2vnehFum/Tfc2/mhStTKwjxW3NgDqgV1NmZI2eINDsLsCixCNu3M7aMMhoNQextwR2p8xQCON1RlAahlY1t4xRTsocfkaWwOp3ZKHqGiHEwBIFjqX1vKIgCV/iTjnGXBtGehLRrqJuF31OzE5Tmi4omoTQ5XgkN1Gzhzoh3MLq3qhMeOnNP6S+WVKEru2GMZGS6OXsqHzevIAUp8bamDEaZbzJZpCKAmC5/eW0RS+2mhKupiB8/bEM9uuPjTzuhOKDCM9eZP6zIJQtpzT8iCHc7vtJ+gb1PWZ99Lfh5pD7vXnReOt+TsDtiAj+iUiID+/S5MfKymkFa8RzBlBm2UmWb6HTkFzB/RUn6RlwHET0TG1OTfH+u8QJ5CNAuHDOq6NQujOyxXtJBqzFSk1B85SROcbhYaGRIk="},{"s":"pfWaCCVvsmiw8CTrXmD1fA==","i":"7i49x4x5NtlSkulo","c":"6tEVQCKMVQkDyETCafIFg9UGwEK6IKQTJ+9tbWWZUoeuBNHvg62unW6BTRE0fF9oKUJahJo1voX1ghHGlRbYSUGzlDsvwpgoav3Jf+8cAIcXDs1vAQfGLEUfmGNdctwUVZWFw7pZ6qsTbSK4Ceodv+7CyK/soNcLGTvQKoO6x5X0Cbf4ObVLa41K2n7piJCpCWMKSqtko41LofqpSV+i0FV1Ze8ptJTatw/2VMVwRyUUwlRobPZJLg5WBsMH7O43OFB8jXtrY3A5Q2pAqz8WogdtBHDLiAO6GSDWMUpGEWj0XsEJOpxP8FoeMNdEWCLl+4FCwYYjtM+B/33pP2keCijd+Qnv/Ju4MYKgq8wxvZMeaXpXNZf9qY7OSusgbNMBqttZJrE0qUbPYaen9c3EoOOt/JbvkFqiCCEBDxGRMn1WBuxQ5mofNq8c3VcxxreQvE7PpGglNIkAlzCCWR1XCb2yqrKMAIEYNnIkaMXpl0pttn+CM42ycKG3KalqgvmSqBBvEuumZF1fBJL3zJT3g9MtCRCh3yFwlatCHkUK4K68Si8g9Xm+zEXMDLGwHAh8utwcYoEkzrMIv9U9xoQ3I9l5Hq6qmD9mml6gG2YqNeeuNO3VPAWZGdmhBCagpktX5OhRe5X7UAPaDjBZq/6+icnj57iJYCttoi/SxgrXoABSEU9qKMCENJpgd8NVNVpUnHX/vGHOFhlzHf9GsduCkqThEvj55vjGQTbBZqQfMArJ9mr+qio0in5yqiRumZowJlPUuuPMme7CFePey33vmjJpH8YQNvx1s+skHeeZg/44DXMHafJAZ+c6LrwJQMV5exGXAA8in9Njqx1vtXZJyVGAeLeYIksUfF4NtHHZj9CoO6cs3MszNkYp9lC/556zlK1dKBd5yKsfl7XWOua1ZnWH4jityG0lDbMCvhQDPAoUKGDws2xn5rzvBhBmDBAHRuWxwF59uoaGLuqXmym+dQqefD7o+Vy+iz5DUtZWISvgP4EyB0Nny+bFOa0GsRPVKAoTNNzgjq07xO4ZNRUPtcQ23Fx8uPqq9sXB3+TecFSe/U87L/02RoekWk7aVvrH+bBgfIsRBu+5ZLq38LrmMbKclK1Akf+P2ohnNAfphjHNRd9jD+uxWGToIw+85dAUbFjwH8RgzNDVt2ntssEPiaUQEQDDyK3LmCf7WiiHFK1yvLtpQPOhvhWuw1RPZBINd/atjMQHN9e7Vj0Ax9FeVUNMr2OYF7yyu0cQ/O6hLBKIRf83dVujXYXysN3ESdM9RfVPSgI4U5Z7WoqXb2TjhErI3Ud8XZLSp6nGlht+vIafaQ=="},{"s":"QiDnQgfKic4Y3VZyTHhNZg==","i":"zJkrcG7ilq5oYzRF","c":"AmYFv+AbBglSHd9bz6iGtFKpaRlYYwg9TDtfgvi5DxZ1eCCtvBd9rB8fuCgpy0mQGCDHJ8II90qAolkdyx4dOIxA2dyDN7ULXsylRtQM2ufWk2PMx/wQ1xMxn+sLU29q7DI5pmDtO/YhuxgdWp8aMpCz7R3hXOyWUxQR3mfbfFVciHr4gDUT7nfeQTRIXlTCAqRMz+FJ8O0ugS6BHZxBMzZRHvQDV6/sX3bllNAExm16E+5R8OGrZBjV1ZC2CFQatTcRvJ6p6fDA6KpKJjA+of5BXIJC9dPv129DgbegySULZnRjNpECpf6Wr5+KMgUweTo4g22gb8Dy2fgpVT6N7jskHcWWezx8ZMHUFR15ECi17b0HZkmmN2e427SKMOiYKRaWLtVMblIW0H5EhirdRs30JyLqauEisXtkYIVix3CDX1+xgoyRQT4uS6qLm4Wy4bP2Ahc8gNVdT7MW/W+sIaFNJZAQiCexnMVJ0oRDncP67AWOyGAkjugbmuQffNvVVetj1OW2U8yh5O1lHcBieWVbR9viCxQE9DQ9lALoOZV7gES1vVsjjRACZKN5DmnX"}],"tg":"","gpt":""};
+var N=D.locked.length+1, stages=[D.first], codes=[], sel=0, KEY='ksq-map-v1';
+var $=function(id){return document.getElementById(id)};
+function norm(s){return s.toUpperCase().replace(/Ё/g,'Е').replace(/[^A-ZА-Я0-9]/g,'')}
+function u8(b){var s=atob(b),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+async function dec(p,code){
+ var base=await crypto.subtle.importKey('raw',new TextEncoder().encode(norm(code)),'PBKDF2',false,['deriveKey']);
+ var key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:u8(p.s),iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+ var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:u8(p.i)},key,u8(p.c));
+ return JSON.parse(new TextDecoder().decode(pt));
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(codes))}catch(e){}}
+
+/* --- карта --- */
+var W=360,STEP=118,TOP=62,H=TOP*2+STEP*(N-1);
+function pos(i){return {x:i%2?250:110,y:TOP+i*STEP}}
+function path(n){var d='',p0=pos(0);d='M'+p0.x+' '+p0.y;for(var i=1;i<n;i++){var a=pos(i-1),b=pos(i),m=(a.y+b.y)/2;d+=' C'+a.x+' '+m+' '+b.x+' '+m+' '+b.x+' '+b.y}return d}
+function flakes(){var s='',r=7;for(var i=0;i<34;i++){r=(r*9301+49297)%233280;var x=r/233280*W;r=(r*9301+49297)%233280;var y=r/233280*H;r=(r*9301+49297)%233280;s+='<circle class="flake" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(0.8+r/233280*1.6).toFixed(2)+'"/>'}return s}
+function drawMap(){
+ var open=stages.length,cur=open-1,s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Тропа квеста: открыто '+open+' из '+N+'">'+flakes();
+ s+='<path class="trail" d="'+path(N)+'"/>';
+ if(open>1)s+='<path class="done" d="'+path(open)+'"/>';
+ for(var i=0;i<N;i++){
+  var p=pos(i),st=stages[i],isOpen=!!st,left=i%2===0;
+  var lx=left?p.x+30:p.x-30,anchor=left?'start':'end';
+  var cls='node '+(isOpen?'open':'locked')+(i===cur?' cur':'')+(i===sel?' sel':'');
+  s+='<g class="'+cls+'" data-i="'+i+'" tabindex="'+(isOpen?0:-1)+'" role="button" aria-label="'+(isOpen?esc(st.short):'Закрытая точка')+'">';
+  s+='<circle class="halo" cx="'+p.x+'" cy="'+p.y+'" r="21"/><circle class="ring" cx="'+p.x+'" cy="'+p.y+'" r="19"/>';
+  s+='<text class="n" x="'+p.x+'" y="'+p.y+'">'+(isOpen?(st.final?'♥':i):'?')+'</text>';
+  s+='<text class="lbl" x="'+lx+'" y="'+(p.y-4)+'" text-anchor="'+anchor+'">'+(isOpen?esc(st.short):'• • •')+'</text>';
+  s+='<text class="sub" x="'+lx+'" y="'+(p.y+15)+'" text-anchor="'+anchor+'">'+(isOpen?esc(st.time||''):(i===open?'введи слово':'закрыто'))+'</text></g>';
+ }
+ $('map').innerHTML=s+'</svg>';
+ [].forEach.call($('map').querySelectorAll('.node.open'),function(g){
+  var go=function(){sel=+g.dataset.i;render()};
+  g.addEventListener('click',go);g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+ });
+ var dots='';for(var j=0;j<N;j++)dots+='<i class="'+(j<open?'on':'')+'"></i>';$('dots').innerHTML=dots;
+ $('progtxt').textContent=stages[N-1]?'Квест пройден':'Открыто '+open+' из '+N;
+}
+
+/* --- карточка точки --- */
+function drawCard(){
+ var st=stages[sel],last=sel===stages.length-1,h='';
+ if(st.final){
+  h='<p class="k">Финал</p><h2>'+esc(st.title)+'</h2><div class="letter">'+st.letter.map(function(l){return '<p>'+esc(l)+'</p>'}).join('')+'<p class="sig">'+esc(st.sign)+' ♥</p></div>';
+  $('card').innerHTML=h;return;
+ }
+ h+='<p class="k">'+(sel===0?'Старт':'Точка '+sel+' из '+(N-2))+'</p><h2>'+esc(st.title)+'</h2>';
+ var chips='';if(st.leg)chips+='<span class="chip">'+esc(st.leg)+'</span>';if(st.time&&sel)chips+='<span class="chip gold">'+esc(st.time)+'</span>';
+ if(chips)h+='<div class="meta">'+chips+'</div>';
+ h+='<p class="lead">'+esc(st.text)+'</p>';
+ if(st.addr)h+='<div class="btnrow"><a class="btn" href="https://yandex.ru/maps/?text='+encodeURIComponent(st.ya)+'" target="_blank" rel="noopener">Открыть в Яндекс Картах ↗</a></div><p class="note">'+esc(st.addr)+'</p>';
+ h+='<div class="box ribbon"><b>Где искать</b><span>'+esc(st.where)+'</span></div>';
+ if(st.inside)h+='<div class="box"><b>Что внутри</b><span>'+esc(st.inside)+'</span></div>';
+ h+='<div class="box"><b>Задание</b><span>'+esc(st.task)+'</span></div>';
+ if(last){
+  h+='<div class="hints" id="hints"></div><div class="btnrow"><button class="btn" type="button" id="hintbtn">Подсказка</button></div>';
+  h+='<form class="code" id="form" autocomplete="off"><label for="codein">'+esc(st.ask)+'</label><div class="row"><input id="codein" name="code" placeholder="Кодовое слово" autocapitalize="characters" spellcheck="false"><button class="btn primary" type="submit" id="go">Открыть</button></div><p class="msg" id="msg"></p></form>';
+ } else h+='<p class="okline">✓ Слово найдено, следующая точка открыта</p>';
+ $('card').innerHTML=h;
+ if(!last)return;
+ var shown=0;$('hintbtn').addEventListener('click',function(){
+  if(shown<st.hints.length){var d=document.createElement('div');d.className='hint';d.textContent=st.hints[shown++];$('hints').appendChild(d)}
+  if(shown>=st.hints.length){this.disabled=true;this.textContent='Подсказки закончились';this.style.opacity=.5}
+ });
+ $('form').addEventListener('submit',async function(e){
+  e.preventDefault();var v=$('codein').value,msg=$('msg');
+  if(!norm(v)){msg.className='msg err';msg.textContent='Впиши слово из записки.';return}
+  if(!(window.crypto&&crypto.subtle)){msg.className='msg err';msg.textContent='Этот браузер не умеет открывать точки. Открой ссылку в Safari или Chrome.';return}
+  $('go').disabled=true;msg.className='msg';msg.textContent='Проверяю…';
+  try{var next=await dec(D.locked[stages.length-1],v);codes.push(v);save();stages.push(next);sel=stages.length-1;render();
+   var c=$('card');if(c.scrollIntoView&&innerWidth<820)c.scrollIntoView({behavior:'smooth',block:'start'})}
+  catch(err){$('go').disabled=false;msg.className='msg err';msg.textContent='Это не то слово. Проверь записку или открой подсказку.';var f=$('form');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake')}
+ });
+}
+function render(){drawMap();drawCard()}
+
+/* --- связь --- */
+var c='';
+if(D.tg)c+='<a class="btn" href="'+esc(D.tg)+'" target="_blank" rel="noopener">Написать мне</a>';
+if(D.gpt)c+='<a class="btn" href="'+esc(D.gpt)+'" target="_blank" rel="noopener">Спросить помощника</a>';
+c+='<span>Застряла дольше 10 минут — открой подсказку или напиши мне. Я на связи весь день.</span>';
+$('contact').innerHTML=c;
+
+/* --- восстановление прогресса --- */
+(async function(){
+ var saved=[];try{saved=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
+ sel=0;render();
+ for(var i=0;i<saved.length&&i<D.locked.length;i++){
+  try{stages.push(await dec(D.locked[i],saved[i]));codes.push(saved[i])}catch(e){break}
+ }
+ sel=stages.length-1;render();
+})();
+})();
+</script>
+
+</body></html>
