@@ -16,7 +16,7 @@
 html,body{background:var(--night);color:var(--snow)}
 body{margin:0;font:16px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
  background:radial-gradient(600px 380px at 85% -5%,#2a3f74 0,transparent 65%),radial-gradient(500px 360px at -10% 40%,#24305e 0,transparent 60%),var(--night)}
-.wrap{max-width:980px;margin:0 auto;padding-block:26px 56px}
+.wrap{max-width:980px;margin:0 auto;padding-block:26px 110px}
 header.top{display:grid;gap:6px;margin-bottom:18px}
 .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--frost);margin:0}
 h1{font:700 clamp(26px,6.4vw,44px)/1.1 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
@@ -81,25 +81,51 @@ form.code label{font-size:13px;color:var(--frost)}
 .letter .sig{font:700 30px/1.1 var(--hand);color:var(--ribbon);margin-top:6px}
 .contact{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--mut)}
 .note{font-size:13px;color:var(--mut);margin:0}
+/* phone: map becomes a horizontal strip above the card */
+@media (max-width:819px){
+ .wrap{padding-block:18px 110px}
+ h1{font-size:clamp(23px,6.6vw,30px)}
+ .layout{gap:14px}
+ .map{border-radius:18px}
+ .node text.lbl{font-size:11.5px}
+ .node text.n{font-size:12px}
+ .card{padding:18px 16px;border-radius:18px}
+ .lead{font-size:16px}
+ .row{flex-direction:column}
+ .row .btn{justify-content:center;padding:13px}
+ a.btn{width:100%;justify-content:center}
+}
+.help{margin:18px 0 0;font-size:14px;color:var(--mut)}
+.tgbar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:flex-end;
+ padding:22px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+ background:linear-gradient(180deg,#0d173000,var(--night) 45%);pointer-events:none}
+.tgbtn{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;gap:10px;font:700 16px var(--display);letter-spacing:.01em;
+ color:#fff;text-decoration:none;padding:15px 26px;border-radius:999px;background:linear-gradient(135deg,#ff6b7a,var(--ribbon) 55%,#b8324a);
+ box-shadow:0 10px 30px #de4b5766,inset 0 1px 0 #ffffff40}
+.tgbtn svg{width:22px;height:22px;flex:none}
+.tgbtn:hover{filter:brightness(1.08)}
+.tgbtn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media (max-width:819px){.tgbar{justify-content:stretch}.tgbtn{width:100%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
  <header class="top">
-  <p class="eyebrow">2 января · квест</p>
-  <h1>Ксюша, сегодня <em>твой день</em></h1>
+  <p class="eyebrow">Квест для любимой</p>
+  <h1>Ксюша, празднуем <em>твой день рождения</em></h1>
   <div class="prog"><span class="dots" id="dots"></span><span id="progtxt"></span></div>
  </header>
  <div class="layout">
   <div class="map" id="map" aria-label="Карта квеста"></div>
   <div id="card" class="card" aria-live="polite"></div>
  </div>
- <div class="contact" id="contact"></div>
+ <p class="help">Застряла? Открой подсказку на карточке или напиши Коле.</p>
 </div>
+<div class="tgbar" id="contact"></div>
 
 <script>
 (function(){
-var D={"first":{"short":"Дома","title":"Доброе утро, именинница","time":"утро","text":"Сегодня твой день, и он уже расписан. По пути тебя ждут конверты: в каждом записка и кодовое слово. Вводишь слово здесь, и на карте открывается следующее место. Ничего сложного, просто иди за подсказками.","where":"Первое слово спрятано дома. Иди в душ, включи воду погорячее и закрой дверь. Когда зеркало запотеет, посмотри на него.","task":"Собирайся спокойно. Деньги на такси и на обед лежат в конверте. Следующее такси вызови к 12:00.","hints":["Слово проявится на зеркале в ванной от пара. Подожди пару минут с горячей водой.","Если зеркало так и не показало слово, открой маленький конверт «на всякий случай»."],"ask":"Слово с зеркала"},"locked":[{"s":"nDgle7EZcaPT0DEq18o+uA==","i":"Q6PNT5oSZJe5/60S","c":"u9/d7gF+123hlyfcgcEN83H8LLDgVicjD8eZIrD4UC9MLUm3izlzyBhGUpu2cAUIxD6HziaF3+ZXUbxb2DiG2R3Xhr2Y0TwmKtKBAgbEcxk2QMOj2iVWCv6XZDpMvcXNRczunXIy8VdNlZAKGCCtg2q0Yk1NzafmHzAR3eu5ZKP3NWif8pgNREBDfIHlD+UGZXXChzMF5r2lCwLjR3ZBi8+BPp4UW7L6IFE7pCUGzTkoVQpYTRbrcQTc5Qnio10jTsKSnk8Y+8esTI9RmPxz26XYVNe1eVM10TbQN+FxEulGukrEr7mxvcP+iy18AFbcZ2AFph4QOAytTrhvlV51ZgdyIAvvVbNwvS1aa5jYXzCb/UXZJmYFFU2SWK5YzCFMzvCmuqhsyGuZx89789B1+o61hO6Td5WlfiwUwaWVweiiRIfMxT/Tz4pNp4lk8FTW8M41MuiQ9cO5ibeyfBdUN6/hOI5Bl6+IYhjUjQzCIT1kY82An4yDLp4K3dT+uMtRQnn4+ulia+K2S2OI+xBxyIWAanmVKgZF9Ztl9eztsYrq71ufVBjTT8EzG3ETw6rU7DUe0bbSNoiwfHjRdQjH6C00uVJaAn9YSshDy9M3x0Hs+ZN9of23VtF3gYtXWcdwN1L0zhrunG46AynpDp+ZUyHEfUqkduVyKz/FKrpmAUQaKLuqxp16raPrbme1xPq86hOHPBC1ZQdG+/DgZoeD00oBQ3nwZhZb1CdhW8285gzg9h5GxvHRiirW55f0mBLoRHpedipTk6yCerAfrglURdI/OHHXHco2fmxA9sZENMrYcVU1vA3hMiUJTTSJKHs3f1qyXEj+mz6szsJNCYbrJQWfqFtyRLc5bRrIjgXeHwOngszyYsuCa13X+5JV7jQrL/D0RJL6vGW3cmFb2INpuf2kRPPzXcKHNKRL8lYZh2S1VE+GupbgUcHRP9kgLu5pN3J31qFof/NutpmG1BQeDA3NYhfWhPkYCYzk/F06HUsW5MFCaC+EGdqCIhx6J/q/CCQRSB+FatDH9hc3BRzha/7hApC1SfJ2s0x/OdkJ/ZRnO73utxUxtITndJEL21ca0Xd9H8/rxm0ABJL+hNDyYRFpUo6UN3gDPdUvMpEXfoxs44T7eabq+U20MhpIAgnbGGvGBjwJHKHhIiZKF16QkBU+1HXXIUz8to4gvbpKc8tX5XiW6VZcV7ebprh7aHoNWpEmD1u/LQthbUn0IvyyX4hZkJWLkCIFeY5pHuLxoXgNmYEL6JMQiqArESj9hnt9caFoAZkLupzumB2ELBC1rLN4J7BI2G2fxNaOkYPs75G/FMf6jf17h79ePyreDc+mwU1JAkWzryVJF0UxxUa5xQWB+SkMYKlr+vBeVHaDD1GbsC/8XHRikC9t5HBK8XcrlOf+EMDcNd5OnniRPEAEEjARp7OYDZtV64CmtL1F4kjqrm8WNWEoqbuRq/Fw3iyJkSHc1DKEOUTBOTuXlLEAfj09EktVQUWH/kTCxsQ8SkU/unPv8TEmk2YB8qz9+j+KVv8OHRVDj/Pzp3MxQ+51cpupMf894Fc61cZX+Nz6HLcULG7hGnrnmlEJj/OndyLa3wXuqorRA7XTEtfABRYwrtLt8tDzwi04n4Mwk3+ImO+EREv9912TBtk2uj0DAfB9Y1/C/87c2TzXC5IRJW9ikQkzE6fXZQ2vs2NP9mNjTlU6iG5cuBM2m0Fk1ez4wZaccBiLASvSBKI="},{"s":"vd61amm3xb+kz46ora+GXw==","i":"+oqSrM/x7w/WYDMW","c":"cWCYS8RcYygsaxYU62i+DLMX8CjPZDldXbpyreTCeymS/NdUKnFXfwRlkm+hcrqmQJcopId9ywd0sASlOODfOf+RooQ+qr/SF9pT+2QtyOeeHh0zVJL8SJuSz9SMocK7S5fyC6NzTZsknUkJwAO8gmwERe8xqhyBnS8eQ4V15Sde7zPsjeJw01zfJqIkUCRm8g67atAHPLBixhUgLX7vFw4/BzpxzSCatz5A3INmX6uPWTRldGDClPPWqLj4apwiHwGXPLG1syDmH/Qg2HER0CbERz3BCf+rBmmWdHM9UMNmAjmhwfYpzsuMKpCVGVGJE62vVZIYmUJn/bnR0ReJaLPW/9SCTcFUo8O9LDbzO3cDW38GmtrrWb5dXJnKhdR3phxB7Al7NP9HuZ71tyZvUkWZTFkhNNYDDsKbtA9BE/Iu04OdQZ17MgwqWGdEfVdxexavu3UoHWbWPFv7jszIGTqiuTnaAkJec3CGA60x7OK4sS9va1UCQTdqoUp5bsYPnd9poSKJpSkY9HXm0oVEcm6nDsHfdPunR4pOhYRoGo/3hPIypYlrcFl0uw1IJiRC4k6sDgQxGoE9+5N+mvPjGNrVdAu9Imd1AuMjoaYPnY0//7pr8qV7Fnc0gBM4xFU1yYJSAP8me33rbWw2TLjYTXFvztD/hTINjouj/RFMP7egsUBLwLxpSo9tgq3y1y9VliFB+aDQdJrAfiINWDAP8EWk/c7CF3pldYHMiNSbQokIHoqAd+MSPQIih306bJtdTDs3InDDAGCYZYmq/EW/H8zyn1w+shqzJfwbaECVJOCQ2ywDZgQ+Eg3K+IQ6kT/WPuyUM3PvwsCzmsYKmFsdpUwa9KXv7wJ5cYmliU27m7OXFoG6tu8gP+68gZMym3P5y89OtB0ZYSuJvxBkZOYM8HR0ZRilQ/oDCGL3gdhxDKI8CUgVBTgGterV34KTsqTCffTUXGKS93LMT2/TXwwn4oENHUE3H3pcrDGchogNkksBQ3Ps2ocKf98KxPFmJujxmo8n/ltjAdNlDnGydNuLIWgGBSuFjyshm2n/+Q9LpzeJQgG/uC6WA/80u82uqsZitiR4Hi/8eKfWNrXoaFc5UqjlHR6vDtnOfiuKs75ayW6/mO2xg29D0Thg5xOgfu9KvM1q4WOzaCQuwuWIO6SqtC2F8VYkAdSV81ccI/r65ntMI6ouXe+XY3BqijOyOKcnJw3FtR3P5gnly4ZYRnLGTa2tiUEBaM6FOmleZXqdiEfC"},{"s":"2A4/cRwVFWO608oGmczsXw==","i":"z+D+vRPI0Q0OfwoP","c":"nwWrv0MGVBJQeNAf/kDEFqlhyOiaFPWfny+4M3fOBJVjJLuXMAdNZ+9twTPpCaNBEdmBTHBq9qbXteumhD5AGLGCqI1wOL87ruCsr97lbgA0lyNfgxpbD9bTT4J17x06ub+QCqonhCmD/LYpbZP4LdfFalzxkTYcWVPsqZ4F8tWQ/1n99VN05BUQIhzu7ngtD0vYhLAUAfgDRUCN6JHrlPd6Ds2aqz3z3Fq2/FlzYH6YAU5VjphAgRPYtX8ZUVFHxr9sxW7Fz7vCUiEmXuJ+RBuTClHiqffnaCdP7jqunzNSliVQd4dnGtGfMAvjGf/tPHLg8ZHbwHDZ/li+yhDAZoC9pg3anR54ubrROaKtOt4uLrUmAS0nUzXgDAfOxT5zF0uYdulxPDPPR3XLs2JzQQqo5gGbEL/jQmmv4HoVoX19JvkMzhi1+gOGMMIBbuWXzEe8cYisKRFwTujK2yT/8k6Yw3k18IKTkO1sBTBT2dKtGPAF/f0x+HJKQLhiQ/VqWM22n62xztzaVzXuQU5stSADMCdgz0WKCXVctiT5dzd500sjds7hrBnNiPEa0KPDr9JbL0jvR/7yaUloWZ7DQqV79F+USFeJm3zP+lEX75IvszoNGItgwKKrgPFK9wLKmM2Zas+tUZDwOX4M5vGlAHeHRYeCabYBfn+XxDx4Q9YGUAnFRZLO3kWnTCLAIDyi6JRBVwSEI+XW4rsQVpu122+WKghwXU7kxL0XyRZY4BgkcfGfm2n3elNW+djDGuCdssxlkBmfEbwaMMNeivRlKLp2VhZRNniDsVntHBECbdU6uGxR7+79KxGq26fQHr+ORrXgYeHD8uf4mI0yqCeoGtX/97OUJ5jDvbHSSgyA/wlFqt56YBdiZevUF1wnXYtnNpeVO1ypTfIhf4+yaQMkspHyMwBxkr1Ut0qPc3BNtqXk4cvsrNrInZbY2BUVrKSGwl/aXki4B4jZyYYFw0tgxnDpB16fowuynzv8VetgFVMCLF1MJFrcdbAttHlV9zcS7+nMEFOgjf9rKxWhjHiwIlSWuxRZhD4+uy0Z5lqWqPE3TR2UGfxQwDOmMckxAXBQO2Dz83Ed3MFwmT9VC3QjuSH0uo+bcSQl/g9TID0LlmdmqFZqrs/2B5ZsyAstwmLAeAzjX0AVEGuTsUV4+ZRMGVHK77AjfuzJMPs48Yrx/ifB4rg="},{"s":"uXNKVWEaxLDUzQ9Trj89pg==","i":"MRhvrDSuzarIOox7","c":"vEds7qBsNAs2waGwel1ctIYo28rBcJ5WfVrdRnSurmEEHE+ycayVjhkQkppSVjwGMSC4MoGE16vQK13Rb+27DuifrftmRNLenQAXfaw+LMaLogY+Eu2Pi9LN9ONemPHL+mXR+jemhfcaqMdC4/b+bdhFSxPQeew5+G/TElo7Ahs2U+lfL8SP7fr5a3ZIgWhEDRgQC0zDLlHgiqpG1Mc7KY6vg3QK4n3HWWW/VtN6oYgfBiiTH7AU4EbW+zszpx6HdL0sJZ4VebBZvmMbmt/YwJGO8l4PziRyBjnocJ89uxvhka74kgV0TlqNTFfmAubJt5OKf9rJ/afiQQPFqSB3lasWEVq6/SNqpbnIaPUijKI5LagHM2eiw6HMZW29lOGtwptduKzJwuReoy+QChUI+ECGCUUoBmXjE3mbgCQX2XOXkTmXGPiG/ae5Hykko4TdMjledgADok95sBZISlSdf5LA3HXiN0k5dN6gU23KX+ZPD/QKubsnC1NPKQYOF8WH9W8IDqBfstGWWNs5+o54/aIjNGy3W7FbP+peiTBMwI46RWeeeP77Cw8aDM+kd04vqIMLPJTPMn0QPcz2M8WT0+fj9+im9b5NJRDcSv9Zpn5Iqc7DBCIN6fjBUUSw10c28ddV/x0VK5y4S4c5uYXBh0/8wxbe1mddhLti1KNALZ9WoJsl+f2YFrTze48ihL2Zxca/Rz1lklM5PRmHWcRjf5Yt/2DC2JpzuHck+FIH5zklynU/hCpB+Oc66LSRt8HymvE2lac0gsg2DaHSR7YvHa4Sp9FBGdbWYLTlghBV5JV+R1jE++oj14wNi8ZM/aozhiqQRQqxOAOPGwdayPhGlVZPms9u+4jQWN41v+w/jzyknMiFYLpijsTVb4KE2jdTLrO6t12CrtCBq2KAX8ut/yd03cTz1bAXxVsXpls4fxDYERkyV9NbbZcBz/JMfelFgAi4eBHg0JTB+CgT60acyBN9eWIRSpCdlEvazKJFq3pAynWQJ6zJuHOF1ao52NwISQYoHtJv+hloy2ps6CFVbsAVjyv8hB5ZxHQLkXjgyqGCGKgH3nfuV4cDVoAsT+icJWnVRE4k4Euu0l4BPoKHQ0zjFIuGiks6NGntvXObnoDZ1UzszF64rGUO6X+LbjnGm9r0to3zQMltL3I4Ka1/r/fWeSc+f8aJpuUjni/fVQs0sluv8Qw2hpTb9bEQWTD1u2J0ahdfkYGXHwy/FCxUxQYKjzAl3w4ymxhzhY5Ks9QTZhz2ORvM4Hikcc+7rO/95bUVTa/ifOfBLlfXsBBwvK8gJhFaT+R+eIlWdVuWiqMkUA=="},{"s":"ln98vgRUfrkQLcBlNLUnlg==","i":"kc7nGjZ2Yspu5W1A","c":"B1V5RaZnreJBTCbNJl7aBm36EHIs2MlJHFxEJBfXZXhZJcYmF6nsUB4vFJptxBldE+KLPbr0A4AdU9hkN0n7QdX0vXBMiRWAgcK8UbTUa1F+GQl3kFAH/xbo0RQ2KDZBY1tk5kjRfisSuRd+M9u+9AjdY58Fk4xVxbztF//1vI7a6vY8CZtO7DpLXMFrsqas4Q5Q49KHCEdrCPWLEe2mVRxk7cNCrtXVOeR2sgU+BYZfDllhe3i9jeJlPnEfpIbJqAQiQ/ZkfxqHuueuDQViD5BNOfVu7yuY5NnPC/JdnznHCwKpBT3ReMQ21d+Pi+0dxpLlyAuradENQfekmZYFGF+dOPveL7UBmMc2Ds7X9dt0Q5wKFuSTJ88Cp9/ePiToIJ82I0qu33Okrr1mVE2H1evXq5qISNVOeV7Urb/zrfuwt7GXr86O8qsi9ieLf4X9drXaVTaP/doIYNS9/xtWc04QOtjpsdYFL8rL0V/biuolcqph0TOKqUJs+1bx70GqdLt06b/ZZxrh71407bAN0BWed8M7/JuP0bBixQHpAXdlVm/XtGRZXw9tDEZ88Nq/"}],"tg":"https://t.me/kolomboy","gpt":"https://chatgpt.com/"};
+var D={"first":{"short":"Дом","title":"Доброе утро, любимая","text":"Сегодня празднуем твой день рождения, и у меня для тебя целый маршрут. По пути тебя ждут конверты: в каждом подсказка и кодовое слово. Вводишь слово здесь, и на карте открывается следующее место. Ничего сложного, просто иди за подсказками.","where":"Первый конверт ждёт тебя в душе. Приведи себя в порядок и не торопись.","inside":"Подсказка, чтобы двигаться дальше, и кодовая фраза.","task":"Собирайся спокойно, впереди прогулка.","hints":["Загляни в душ, конверт там.","Введи фразу из конверта целиком. Пробелы, запятые и большие буквы не важны."],"ask":"Фраза из конверта"},"locked":[{"s":"ePkJNXOKYZQIK1neb5RYhQ==","i":"CeB4XWa/WQHxa5Rt","c":"aKbd/KEr1MEFwRSo/630DpzdjDyv2WrU4OVT1U4SqsGHDJ6hifVFLW3vIRymiXd7CaHDdYkwt52o/4S7aUdxJJMsKIrbtBG/1X386vZDK+i7oHo+05DRYS81G3XHczgVFqWhCCRgK6HlOpZL9m6wFLB/gumdC3K5VT9jwTEzI9cNcUHDmqCaT/rnj/fn28MBqt0R8hSEPiroUH31WfF2HMRC05CTTHoF2xD6lwtjwivQdMeRmhOcg+LMpIfnyZdb9OxgUtkSu6kH0M1AgN8jIRKcECczIHldCGGdWyZsdOTztHcf+g2clk/1ynMaNtMyMjFTK9BrcjprzreJrG1ZSyo73o2qsqQ48T4uJMrr92blIzBJCPs4dRnraPQ+96cKC8JXdzxumhfDuj1OaVsN6Xcv+jNV44riZ25zRfi/DFkcpNwYFfBi79tlCyr0UEQ14nNMtJwAxa6AJlh7kBlgm8sqv8fXXX7BC5it1SFdhmPGApl9VvYS5XabE+lIm7tsWYUvQ6Mf15ejMtCjAYE+7Kbx1Y4Pr+w7bWLlErFsW0sS9o4yJnEmjwCyKvlvtyJKcRSdKT1H6NeaG1wz0G2J/giqf0xDMiCosifGWwzRN0LGtfbsNrXn62RB+RQCUIn/IHXatXTgFkJs69H4S9TduwFmtlgSsG4VyLqJTVj/fo+zjNIkC5zMBCSVGjOf21dKV+PGmPbmTiu4qM9T3OdjSVxbaRvbxHPXgWTzMQnJk+iW49GA7qZLZMIaQ00v+3cBNREFRPA4NNzHnX3ccvyeQdLCw7lrpfen83JFTLLR5xXXq0p1vz1VLqCbPxqsXldvzvLp1IHqbVqTtHru/GUJpmr6c4nL4N/qcgBDe2tgN0hwJ6iwNPtduwWlamMqMkPl5XNjp/0L9v2oxEuxDIf6tJsIC6wWLXZqQjAazS8r7tZocoWwmB2kRouidn6w0xhoYFfcqjPK1fneCp10htzN1no4maZu9ACG4vgC45G4or7gb7nwyci0q8E5Jnv3OYrGWQ3fzH7yroFuzieqF+lW2ZUBDiUzq3syprHjousXre6NyNta8acqIFy+n+hfT7ad+zyovUC2fv4922Wcs6D5C24rLS+YE0UKW2lxR+U9w5pWkPbuKGOplk0ffFiG1Y1P4g0VRmj+kE/rmtlbzgFbUD2tE06vOIROTV0lH+76Xyw41qk2A91IqB3Y6RaitLQpbofRltz74CwuX5cLLUMlKUvoaoYB/pA3YXLo4LCXQZPxl27Ck53okSzZR4M9ZARDbNPiTI/8RzbnAW6BY/dX+bGn1Qy2aR5U1zJITPBCsbeAya9UtLDSddB1rPasWS0HQMpls2aX3WfnROQ8h521tz3sNsZurnNFOCPwXm3mly4n0Sfb73FMdE6WX1S/SKnXPAcMaTTsWIbA1Df1sfCrN1fldgKkBMEKLG1lLRnSeySmvrY="},{"s":"rIw0CJZroXvwxGf5iQtQxg==","i":"sYs/UCwSC7PPfCah","c":"MJ8TVZCqZS9ooN9YShQuNU+petx+JwJyrpQSObfhdLfIeY0JcRa8OnMx+DDC8IWC8NPnPXEhjboXxjOrEZHsX2hRoIfoplRm6voE/AnKClSbMfxCXjByIhlgh9ZwBfGteB+WfOdLTiKWKpaaHuqt7SaBgNvjFGh71P9vmL3T67DWWOAMbuMnYivWSLlqCFStcaKA5Fik4L64AhRUq8WjnsIQUtwfwgMQ/EFscAifcMYTU8xB7QzidROyHUIBFoBvFuLMq7yK0DHWc/xeQRgtcv2bATfmJDiaLfg0AeI0a4Zn4amt6TZ3Y7uwPoy1iiW6eNRewV5NFBoepHIQur3i0mu6/W6KhMbRna49taFGuD/IBxv2MrtFQDgHvGEmV/rRAcgA2cV3C9TmDUmkQuXg3YVZ+Gh2RHHYp1A3dpre2REETv8pTGi6Oaz1m71jDEl6VU3rYatYcrBK7biGRIpWV/Q4VMF0ZqoyS2YwsG24wAANLXXYqUQ3Nrq1Ji+Be1wm7D1vkv0F2koTT7PpuyxxKDwOnigi7dS7gZEkGHAKD3/RA66gFy7y5YZg62xi3GfwRbdU7uUr0vu8qpxIIPXmwoCU4j/7wl2GDalCGOozo4WJB6MUryWkg8KxD4ksq20DUTbWWtop/mo4fGuykmVhn6t5u/tM6uvTrRZGEUA1Wbdw5D667xhmaJR9KUlvgLwFMQGRMIrIjS0pAGl1O0FEShezPH82t2lAiHzvPyUNQeh7qxccWP1WV5icB9MN1cAYJGwTFADCrMczki+5rPO/qAMaBVbBdJyseNQkugRYk/IQcGNqwx6inHojsUmWJSSGIzUuRLDCShD9Fi4BhQZxLJo2rxJ7UAmZzWrlVWo0OR8GkKti5oLPzTmJ5ciZqZ5xOqcUW+ZHapbJX/8vh8jis4dJkK0XqngYpYyRfWUTImggD4Vlc/fpfHkUrG+W5n1O50amz1ibhQbuJQysp8lMJppNE5N9mNSs+7fCdsEf8zfvWERTIelr67MJs3po2QNeJI5vF7/QAQ4wyEQXRGzOJDOMKmPsZAqpjt3+CO/Tq54hYQYdJXJSSbzOBNTltnfFR3n3PHvmVhkcoDVlx8mr/4LByK1jdARx6kM8zbXfwq/U4/w2/zDBK26TJ9/Usen8xJa98fRCG5aGux8snm2Socuo+2aoA3DnW9uo4pQgE4SOlOy6Rq2wcM6bFWE/VGQ6iT/F6JUNbcaPm6x4Olw1wJQkAlLOJ/E2SPSWkDVFpUg2hm6CDGD/2K0sTL9vCvL5B67f/VE94VEIOALndufZ31eLSF1MpMAaHM9Q0pxdp9WBserAC8z4lJ/cjRmUq7nFFyL3Tdjkfo5+iQg="},{"s":"Qr52O6X2QBDOsaPJwy2H1w==","i":"byt3GyusvVsj/rVz","c":"ODwJoKH0xA+Gc5Xu41zpMH1jPO6+4qUJ8FkImWW0QZ/elZ5SKqyhCHqFmb2A9tvAlZafx5kBn7KBHB3efLfk3nNdfQsOBAdYgEI5y8ySEIEcYMBFCxCYQLfMShaO4UPCeluGBLX6r2oWuvChH6VgN03GSAVv/wGwmkZJGPY0bUNWmKwXIQSXNaRuUjpSNd3H4CZKPx7liD5shVwc5f323/X3epVY7AoeX1cjO5YJRWGVH7FVuLiBZ4UGLJfYr/A+uYNp7Ecx58meoXD1ohFJ1w9VxMfof4zhoHhaaoQOt3lBlZkn3TmuDjW/loaFPinEx0r/OOohrSqp/J6ixPVZJTpCdJRnsfJqzXvpFnu9w6S1KU+mAj9rMZcm1YiVtHa2JEATs7U5ByHAGM8FrEkPCHWJaBH4ll0zuyspB7lPk0TVhudvA5BzHcV79R90ARiqABvGDQ1XxvkvTn24EQWX6e93FtktRc8MHUH6uTK4j5dFRzLgesKoS8UrIOrrVlhBawniIxVPPfDB7Jmo2HXuLdIDebeU0Q1sSD14JVYsPFS4IoTJQznbZEejwqD5COSjWsFAEzq9DZexUjTR7esuQICgm/i+SlKm+Hn7e3H+GhubD4xbmTNoq1hZ4PXWHRT4ff8OKGmAkSj89jPO3ubijRLubrrE44ugOXue0V/8ulQGI8zF08dhvX4gnehtjK+SbMMXC6yH/w8vI9p7cNL59U2IxsWj1NrmqNWBBgqhAYHbz3A7l1gW5MY4gnR2O+qBIUApVhUY10NDbEvvT20qjvblArcJkqMmHilQd77hSuQ2LOegcd7AsQubiGaEzWb3Mk6WpfhWWX80JnWeyP+Dg05t0KsTcgUCmSx7ZQGV8wLgm2oAWtO8c+S0yZpIUdFRnHc/hSp4bFs9lWUnrsLd5nOFSoSVSJBrqRXHrk9CUMDJS3FQ4WyJDaEnYwTEeBAww14tk+eQVxE+a2CwnbxG0WfXHHEX2jgNbua4x7o4iaCmI6UllS30v+3FZy1Xem3ojpFwvrgyiHKe3Yg/Yltkj6v4PD19URmN55NcgJrrFv1py2wQ7DF2IsCody7ErN+bwUMssR8Bi0a4N5bAxhspao6OrAk8bN1GlgBc+KDrUyBuD9eam3XYfZwMG9RKv/ZG6SWXOt7lDBxi5ZlyxkMFs1fWsC/sQYQdjQFEMaZkD4M7xZYhMSY5mQpRgeA/CAXFqNlkxoZtzWpbGpKFsS99aSc9wJpNftB3AVyXibFzQKVLz5kFKgj7xITCOUWd79vT6vtdBCkrK0QLY/WCRZTOtZ+M"},{"s":"9gGxtX5McfnxXE5ahplcxg==","i":"ULbHVaStQkZOJYUR","c":"pZZXiZYGKfTHXpR2POiqrDKyJ/XGbVlv+wurHduatM+p3W9nJFRf0f475yxdzFizczeG5lMYIHbGiW97f151dBPNRpDrCJe3KA4VDag45Ofdv06IszuRQVe6zSJnX+XBmRt4Kl89fMK50JKIhvnJOfyZeq4V5r0r3J9kpCpXkRpxTYxhzA8naDRC0ycZc06R7bCOFjzmDBhb5yy/DllnOOUIW0BuhctqeIVuoSnVXrwlUiCkychZLtTtN0a7Rn41lxgzV9ff0YiXrO8zs0lnJ/I50hbyGOgQdH2iSuCdextlvnZfzQyHzAp/BVb1HlFJLE1dDCEaZVmyi+zDXjdnkmRhjX+fJUF1lVALG7BpeNwCQOqRYllwrebrJmZ3MrlsGeoU4k/StxD/Gw6qc+94qmbIZfalNagF3/BPUXE42vHFWmSUABfub20Gxifwe6eHY5m2nq9zGeqTq7IH9gtXEPIlNGvw4GjKfFTGJ7CjEJHjwGYxnZt3W4tfIfPhojcOXTNpl6DQtssgI7mB7d0Bz5c2SpGDJ1EZmVfoWThQ+cs8XIqJ6V0Fxhd7vCp/JXSRjPXCZUesac0ofWGT72NofwXfefC5+IkJ6e17X9JkMofwE5otdXlCBueOjq1ZSk6RTLGy8tqhgcs47JhhXqJRVlY3hxokiU8X+4HyAn0Zk+PSNOHhGjmTV5uJ6i5OFhWznYO0zWLo9MUJTRUsuiE8c3+xSeLkcn5VDVvB2YPX04JZrI9UcZ2VpxZ9GVYZAgP6pFGxvs7il7xYefH3XU8veRESU5O3PuKoFh0NWXhM0lNh6BVq2R33xY0jh0Ic/Afxc4sw84uI+7uTkrXLLsdemQhuxjY50XkIPBvJUxqgBGq+PleCRZk9XK5qD8QoIEVoDR+WhIXsHgrtjlBiGfwBsQEM4+A0avSLc80sj1MoSO4IyyAGrc/k9Y/BFt7X3UbgFwOgSr25b1/Beh1yhxwewu9AwzzIVWBwFfaa6U+xezIofDLYTomBcfVRnWeR6GtZ+ef3k2weyA7dp9cSHZeOtzs1Vtib0ZiAqc0i00neBnyej/NYO9CRvteIDb78W6Pxoci8qZmfF+A34XQowQbDxJhe3+aTRGFcm2YG4WS4bRZ8JNGjlcVozmpgSjfSYwYL6eFnC/BtAUxZAk595ty3wX3s7ig3oE3gx2KkVDtKUmXN7JNCEZ71eAuVt6Y/y9jlH0BImLPaDJq9dXTCkNhZ+CvVP9r1QovfWQ8021IjDfGiALbwDHFrm/HK/hAZorJkY/a9Sp0lZV2XgAwbZBnPPTcxQ0TmYh0qmb0Y0tN93mbyxH/JeY+6T1qJK7TiWtFWqxwOZE7QZ4LHcO7amummHlRcCFABK5a1Dvpy4+0Ll2OJw2FCCTr2upvEWQ1agGUshvyEQ17Mvtxfqnhxm7d76qJLX/kF3WQiRXeBqnkxYOLeiGJG6oipl2QitB72ib1yG0VWZA6h1hal+d7gyudHeJ+lZBMd1bTaQRkB"},{"s":"UDDqogMN6MdTg8lz2NqZCw==","i":"zMYFT+y3UYGUMFqO","c":"SE/6u5wHlI03n6rZZCbjGT7SC4OOk7Foz5CLLRR6YnbhyVRuxHDyQqnUnk/NfK/vU4NpFy7GJa1npIPg3hX9WEuReuUZ7r924KijlydwXsD3EMkJqO9SBtvEf2HjQ3LZxHjwjMmkO/V6VqZi01riI6atLdVRDOMqQ5OljVf14VqwvqVLtsiLilPT1cBdMiNkbdMaj+7yy6jLfCBsiQdJwR9xaM9EBy9NU/G6a8ADHVKaqHWXngj22sjnpfjyt1kQ8tMSgCmcB1W1NwDXlUSUrsJxN/lOGTYqLkO5TfcslLDvBNRqGPDDw55y0eG3zeXv8sDLntIHVlDkZPOaG18/emJdUUX1Rzl0aeDkJoUUpg2ywVsoO+2mtYhWEriDk0hn4k8zpHe46qfGAtz4cCh/pCBfyiOZ80QzMxbHu+x/pwPQN/lNN7n0jvNJA+k3dYMkBuvJP99J1+QhOCr62NDNzYQPxm2b0IENVGUyJvQ5Eb7XBbVCQw/YtDCVynZjTIrfpyzHm30FBj09hpnjGXjZtFofxqnwdDk="}],"tg":"https://t.me/kolomboy","gpt":""};
 var N=D.locked.length+1, stages=[D.first], codes=[], sel=0, KEY='ksq-map-v1';
 var $=function(id){return document.getElementById(id)};
 function norm(s){return s.toUpperCase().replace(/Ё/g,'Е').replace(/[^A-ZА-Я0-9]/g,'')}
@@ -114,23 +140,25 @@ async function dec(p,code){
 function save(){try{localStorage.setItem(KEY,JSON.stringify(codes))}catch(e){}}
 
 /* --- карта --- */
-var W=360,STEP=118,TOP=62,H=TOP*2+STEP*(N-1);
-function pos(i){return {x:i%2?250:110,y:TOP+i*STEP}}
-function path(n){var d='',p0=pos(0);d='M'+p0.x+' '+p0.y;for(var i=1;i<n;i++){var a=pos(i-1),b=pos(i),m=(a.y+b.y)/2;d+=' C'+a.x+' '+m+' '+b.x+' '+m+' '+b.x+' '+b.y}return d}
-function flakes(){var s='',r=7;for(var i=0;i<34;i++){r=(r*9301+49297)%233280;var x=r/233280*W;r=(r*9301+49297)%233280;var y=r/233280*H;r=(r*9301+49297)%233280;s+='<circle class="flake" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(0.8+r/233280*1.6).toFixed(2)+'"/>'}return s}
+var MQ=window.matchMedia?matchMedia('(max-width:819px)'):{matches:false};
+var W,H,R,STEP,TOP;function geo(){if(MQ.matches){W=360;H=104;R=15;STEP=(W-56)/(N-1)}else{W=360;STEP=118;TOP=62;R=19;H=TOP*2+STEP*(N-1)}}
+function pos(i){return MQ.matches?{x:28+i*STEP,y:i%2?62:34}:{x:i%2?250:110,y:TOP+i*STEP}}
+function path(n){var p0=pos(0),d='M'+p0.x+' '+p0.y;for(var i=1;i<n;i++){var a=pos(i-1),b=pos(i);
+ if(MQ.matches){var mx=(a.x+b.x)/2;d+=' C'+mx+' '+a.y+' '+mx+' '+b.y+' '+b.x+' '+b.y}else{var m=(a.y+b.y)/2;d+=' C'+a.x+' '+m+' '+b.x+' '+m+' '+b.x+' '+b.y}}return d}
+function flakes(){var s='',r=7;for(var i=0;i<(MQ.matches?12:34);i++){r=(r*9301+49297)%233280;var x=r/233280*W;r=(r*9301+49297)%233280;var y=r/233280*H;r=(r*9301+49297)%233280;s+='<circle class="flake" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(0.8+r/233280*1.6).toFixed(2)+'"/>'}return s}
 function drawMap(){
+ geo();var narrow=MQ.matches;
  var open=stages.length,cur=open-1,s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Тропа квеста: открыто '+open+' из '+N+'">'+flakes();
  s+='<path class="trail" d="'+path(N)+'"/>';
  if(open>1)s+='<path class="done" d="'+path(open)+'"/>';
  for(var i=0;i<N;i++){
   var p=pos(i),st=stages[i],isOpen=!!st,left=i%2===0;
-  var lx=left?p.x+30:p.x-30,anchor=left?'start':'end';
+  var lx=narrow?p.x:(left?p.x+30:p.x-30),anchor=narrow?'middle':(left?'start':'end'),ly=narrow?(i%2?p.y+31:p.y-24):p.y+5;
   var cls='node '+(isOpen?'open':'locked')+(i===cur?' cur':'')+(i===sel?' sel':'');
   s+='<g class="'+cls+'" data-i="'+i+'" tabindex="'+(isOpen?0:-1)+'" role="button" aria-label="'+(isOpen?esc(st.short):'Закрытая точка')+'">';
-  s+='<circle class="halo" cx="'+p.x+'" cy="'+p.y+'" r="21"/><circle class="ring" cx="'+p.x+'" cy="'+p.y+'" r="19"/>';
+  s+='<circle class="halo" cx="'+p.x+'" cy="'+p.y+'" r="'+(R+2)+'"/><circle class="ring" cx="'+p.x+'" cy="'+p.y+'" r="'+R+'"/>';
   s+='<text class="n" x="'+p.x+'" y="'+p.y+'">'+(isOpen?(st.final?'♥':i):'?')+'</text>';
-  s+='<text class="lbl" x="'+lx+'" y="'+(p.y-4)+'" text-anchor="'+anchor+'">'+(isOpen?esc(st.short):'• • •')+'</text>';
-  s+='<text class="sub" x="'+lx+'" y="'+(p.y+15)+'" text-anchor="'+anchor+'">'+(isOpen?esc(st.time||''):(i===open?'введи слово':'закрыто'))+'</text></g>';
+  s+='<text class="lbl" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+(isOpen?esc(st.short):(narrow?'':'• • •'))+'</text></g>';
  }
  $('map').innerHTML=s+'</svg>';
  [].forEach.call($('map').querySelectorAll('.node.open'),function(g){
@@ -149,7 +177,7 @@ function drawCard(){
   $('card').innerHTML=h;return;
  }
  h+='<p class="k">'+(sel===0?'Старт':'Точка '+sel+' из '+(N-2))+'</p><h2>'+esc(st.title)+'</h2>';
- var chips='';if(st.leg)chips+='<span class="chip">'+esc(st.leg)+'</span>';if(st.time&&sel)chips+='<span class="chip gold">'+esc(st.time)+'</span>';
+ var chips='';if(st.leg)chips+='<span class="chip">'+esc(st.leg)+'</span>';
  if(chips)h+='<div class="meta">'+chips+'</div>';
  h+='<p class="lead">'+esc(st.text)+'</p>';
  if(st.addr)h+='<div class="btnrow"><a class="btn" href="'+esc(st.yaUrl||'https://yandex.ru/maps/?text='+encodeURIComponent(st.ya))+'" target="_blank" rel="noopener">Открыть в Яндекс Картах ↗</a></div><p class="note">'+esc(st.addr)+'</p>';
@@ -158,7 +186,7 @@ function drawCard(){
  h+='<div class="box"><b>Задание</b><span>'+esc(st.task)+'</span></div>';
  if(last){
   h+='<div class="hints" id="hints"></div><div class="btnrow"><button class="btn" type="button" id="hintbtn">Подсказка</button></div>';
-  h+='<form class="code" id="form" autocomplete="off"><label for="codein">'+esc(st.ask)+'</label><div class="row"><input id="codein" name="code" placeholder="Кодовое слово" autocapitalize="characters" spellcheck="false"><button class="btn primary" type="submit" id="go">Открыть</button></div><p class="msg" id="msg"></p></form>';
+  h+='<form class="code" id="form" autocomplete="off"><label for="codein">'+esc(st.ask)+'</label><div class="row"><input id="codein" name="code" placeholder="Слово или фраза" autocapitalize="characters" spellcheck="false"><button class="btn primary" type="submit" id="go">Открыть</button></div><p class="msg" id="msg"></p></form>';
  } else h+='<p class="okline">✓ Слово найдено, следующая точка открыта</p>';
  $('card').innerHTML=h;
  if(!last)return;
@@ -179,11 +207,9 @@ function drawCard(){
 function render(){drawMap();drawCard()}
 
 /* --- связь --- */
-var c='';
-if(D.tg)c+='<a class="btn" href="'+esc(D.tg)+'" target="_blank" rel="noopener">Написать мне</a>';
-if(D.gpt)c+='<a class="btn" href="'+esc(D.gpt)+'" target="_blank" rel="noopener">Спросить помощника</a>';
-c+='<span>Застряла дольше 10 минут — открой подсказку или напиши мне. Я на связи весь день.</span>';
-$('contact').innerHTML=c;
+if(D.tg)$('contact').innerHTML='<a class="tgbtn" href="'+esc(D.tg)+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.6 2.9 10.8c-1 .4-1 1.7.1 2l4.6 1.4 1.8 5.6c.3.8 1.3 1 1.9.4l2.6-2.5 4.9 3.6c.7.5 1.7.1 1.9-.7l3-15.3c.2-1-.8-1.8-1.7-1.4zM9.6 14.2l8.6-7.4-6.9 8.7-.3 3.1-1.4-4.4z" fill="currentColor"/></svg><span>Написать Коле</span></a>';
+else $('contact').hidden=true;
+if(MQ.addEventListener)MQ.addEventListener('change',function(){drawMap()});
 
 /* --- восстановление прогресса --- */
 (async function(){
